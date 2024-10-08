@@ -29,6 +29,10 @@ MainWindow::~MainWindow() {
 
 void MainWindow::openFileSlot(){
     qDebug() << "file opened";
+    mainWindow->statusBar()->showMessage("loading in histogram of colors...");
+    mainWindow->setEnabled(false);
+    mainWindow->statusBar()->show();
+    QApplication::processEvents();
 
     QString fName = QFileDialog::getOpenFileName(this, "Select image file", lastDir, "Image files (*.png *.jpeg *.jpg *.bmp)");
     if (fName.isEmpty()) return;
@@ -43,7 +47,8 @@ void MainWindow::openFileSlot(){
     HistogramViewer *histogramViewer = new HistogramViewer(image);
     setCentralWidget(histogramViewer);
 
-
+    mainWindow->setEnabled(true);
+    mainWindow->statusBar()->clearMessage();
 
 }
 

@@ -7,12 +7,6 @@
 HistogramViewer::HistogramViewer(const QImage &_image)
     : image(_image)
 {
-    //status bar
-
-    mainWindow->statusBar()->showMessage("loading in histogram of colors...");
-    mainWindow->setEnabled(false);
-    mainWindow->statusBar()->show();
-    QApplication::processEvents();
 
     mainLayout = new QHBoxLayout();
     setLayout(mainLayout);
@@ -87,13 +81,11 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     connect(sliceSlider, &QSlider::sliderMoved, this, &HistogramViewer::ChangeSlice);
     picLabel->setPixmap(pixSlices[0]);
 
-    mainWindow->statusBar()->clearMessage();
-    mainWindow->setEnabled(true);
-
 
 }
 
 void HistogramViewer::LoadHistData(QString color, int scale){
+    QApplication::processEvents();
 
     char pixmapColor = color == "red" ? 'r' : color == "green" ? 'g': 'b';
     QVector<QImage> imageSlices;
@@ -102,6 +94,7 @@ void HistogramViewer::LoadHistData(QString color, int scale){
     imageSlices.resize(256, blankImage);
 
     for (int iData = 0; iData < 1<<24; ++iData){
+        if (iData % 1000000 == 0) QApplication::processEvents();
         uint primaryColorVal;
         uint xPixmap;
         uint yPixmap;
@@ -151,6 +144,7 @@ void HistogramViewer::ChangeComboboxColor(QString color){
     QApplication::processEvents();
 
     LoadHistData(color, scaleSpinBox->value());
+
     mainWindow->setEnabled(true);
     mainWindow->statusBar()->clearMessage();
 
