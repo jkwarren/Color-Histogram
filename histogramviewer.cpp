@@ -98,6 +98,12 @@ HistogramViewer::HistogramViewer(const QImage &_image)
 }
 
 void HistogramViewer::LoadHistData(QString color, int scale, bool rgbSum){
+    /*
+     * Fills a cube of pixmaps representing all RRGGBB colors with ocurrences of a given pixel
+     * color represented through it's number of ocurrences in the given image.
+     *
+     * Is able to slice by R+G+B value as well with rgbSum = true.
+     */
     QApplication::processEvents();
 
     char pixmapColor = color == "red" ? 'r' : color == "green" ? 'g': 'b';

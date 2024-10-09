@@ -48,4 +48,3 @@ public slots:
 
 
 
-//******************************can ask when we should bother with pointers
