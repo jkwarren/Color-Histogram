@@ -51,7 +51,7 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     //scale for pixel value on histogram
     scaleSpinBox = new QSpinBox();
     scaleSpinBox->setRange(2, 256);
-    scaleSpinBox->setSingleStep(2);
+    scaleSpinBox->setSingleStep(8);
     connect(scaleSpinBox, &QSpinBox::valueChanged, this, &HistogramViewer::ChangeScaleValue);
     spinBoxLayout->addWidget(scaleSpinBox);
 
@@ -117,14 +117,12 @@ void HistogramViewer::LoadHistData(QString color, int scale){
         }
         //making the color
          //160 ensures the color isn't any lighter so it shows up on the pixmaps
-        int color = static_cast<int>(160 + scale * static_cast<float>((histogramData[iData]) / totalPixels));
-        if (color > 160) color = 160;
-        if (color < 0) color = 0;
-        color = 255 - color; //have to reverse it so larger numbers are closer to zero (black)
+        int color = static_cast<int>(170 + scale * static_cast<float>((histogramData[iData]) / totalPixels));
+        if (color > 255) color = 255;
 
         QColor pixelColor = QColor(color, color, color);
         imageSlices[primaryColorVal].setPixelColor(QPoint(xPixmap, yPixmap),
-                                                   histogramData[iData] > 0 ? pixelColor : Qt::white);
+                                                   histogramData[iData] > 0 ? pixelColor : Qt::black);
     }
 
     for (int iSlice = 0; iSlice < 256; ++iSlice){
