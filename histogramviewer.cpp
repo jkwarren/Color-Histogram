@@ -116,7 +116,7 @@ void HistogramViewer::LoadHistData(QString color, int scale){
                 break;
         }
         //making the color
-         //160 ensures the color isn't any lighter so it shows up on the pixmaps
+         //170 ensures the color isn't any darker so it shows up on the pixmaps
         int color = static_cast<int>(170 + scale * static_cast<float>((histogramData[iData]) / totalPixels));
         if (color > 255) color = 255;
 
