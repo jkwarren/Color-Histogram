@@ -42,18 +42,18 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     rightLayout->addWidget(colorCombobox);
 
 
-    spinBoxLayout = new QHBoxLayout();
-    rightLayout-> addLayout(spinBoxLayout, 2);
+    comboBoxLayout = new QHBoxLayout();
+    rightLayout-> addLayout(comboBoxLayout, 2);
 
-    spinBoxLabel = new QLabel("scale of pixel values");
-    spinBoxLayout->addWidget(spinBoxLabel);
+    comboBoxLabel = new QLabel("scale of pixel values");
+    comboBoxLayout->addWidget(comboBoxLabel);
 
     //scale for pixel value on histogram
-    scaleSpinBox = new QSpinBox();
-    scaleSpinBox->setRange(2, 256);
-    scaleSpinBox->setSingleStep(8);
-    connect(scaleSpinBox, &QSpinBox::valueChanged, this, &HistogramViewer::ChangeScaleValue);
-    spinBoxLayout->addWidget(scaleSpinBox);
+    scaleComboBox = new QComboBox();
+    QStringList scaleOptions = QStringList() << "2" << "4" << "8" << "16" << "32" << "64" << "128" << "256";
+    scaleComboBox-> addItems(scaleOptions);
+    connect(scaleComboBox, &QComboBox::currentTextChanged, this, &HistogramViewer::ChangeScaleValue);
+    comboBoxLayout->addWidget(scaleComboBox);
 
 
     QPixmap blankPixmap = QPixmap(256, 256);
@@ -71,13 +71,14 @@ HistogramViewer::HistogramViewer(const QImage &_image)
 
         for (int x=0; x < image.width(); ++x){
             QRgb &rgb = line[x];
+            //qred does -> c &0xff0000 >> 16 where ff is the color we want in 0xAARRGGBB
             rgb = qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), 0);
             histogramData[rgb] +=1;
             totalPixels +=1;
         }
     }
 
-    LoadHistData(colorCombobox->currentText(), scaleSpinBox->value());
+    LoadHistData(colorCombobox->currentText(), 2);
     connect(sliceSlider, &QSlider::sliderMoved, this, &HistogramViewer::ChangeSlice);
     picLabel->setPixmap(pixSlices[0]);
 
@@ -141,20 +142,20 @@ void HistogramViewer::ChangeComboboxColor(QString color){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
-    LoadHistData(color, scaleSpinBox->value());
+    LoadHistData(color, scaleComboBox->currentText().QString::toInt());
 
     mainWindow->setEnabled(true);
     mainWindow->statusBar()->clearMessage();
 
 }
 
-void HistogramViewer::ChangeScaleValue(int value){
+void HistogramViewer::ChangeScaleValue(QString value){
     mainWindow->statusBar()->showMessage("loading in histogram for selected scale...");
     mainWindow->setEnabled(false);
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
-    LoadHistData(colorCombobox->currentText(), value);
+    LoadHistData(colorCombobox->currentText(), value.QString::toInt());
 
     mainWindow->setEnabled(true);
     mainWindow->statusBar()->clearMessage();

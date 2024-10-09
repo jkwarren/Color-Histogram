@@ -19,9 +19,9 @@ class HistogramViewer : public QWidget
     QSlider *sliceSlider;
     QComboBox *colorCombobox;
 
-    QHBoxLayout *spinBoxLayout;
-    QSpinBox *scaleSpinBox;
-    QLabel *spinBoxLabel;
+    QHBoxLayout *comboBoxLayout;
+    QComboBox *scaleComboBox;
+    QLabel *comboBoxLabel;
 
     QVector<int> histogramData;
     int totalPixels;
@@ -37,7 +37,7 @@ private:
 public slots:
     void ChangeSlice(int value);
     void ChangeComboboxColor(QString color);
-    void ChangeScaleValue(int value);
+    void ChangeScaleValue(QString value);
 };
 
 #endif // HISTOGRAMVIEWER_H
