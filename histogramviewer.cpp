@@ -74,9 +74,10 @@ HistogramViewer::HistogramViewer(const QImage &_image)
             //qred does -> c &0xff0000 >> 16 where ff is the color we want in 0xAARRGGBB
             rgb = qRgba(qRed(rgb), qGreen(rgb), qBlue(rgb), 0);
             histogramData[rgb] +=1;
-            totalPixels +=1;
+
         }
     }
+
 
     LoadHistData(colorCombobox->currentText(), 2);
     connect(sliceSlider, &QSlider::sliderMoved, this, &HistogramViewer::ChangeSlice);
@@ -117,8 +118,8 @@ void HistogramViewer::LoadHistData(QString color, int scale){
                 break;
         }
         //making the color
-         //170 ensures the color isn't any darker so it shows up on the pixmaps
-        int color = static_cast<int>(170 + scale * static_cast<float>((histogramData[iData]) / totalPixels));
+         //50 ensures the color isn't any darker so it shows up on the pixmaps
+        int color = 50 + scale * histogramData[iData];
         if (color > 255) color = 255;
 
         QColor pixelColor = QColor(color, color, color);
