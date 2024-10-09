@@ -166,6 +166,7 @@ void HistogramViewer::ChangeComboboxColor(QString color){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
+    sliceSlider->setSliderPosition(0);
     LoadHistData(color, scaleComboBox->currentText().QString::toInt(), rgbSumCheckbox->isChecked());
 
     mainWindow->setEnabled(true);
@@ -179,6 +180,7 @@ void HistogramViewer::ChangeScaleValue(QString value){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
+    sliceSlider->setSliderPosition(0);
     LoadHistData(colorCombobox->currentText(), value.QString::toInt(), rgbSumCheckbox->isChecked());
 
     mainWindow->setEnabled(true);
@@ -191,12 +193,24 @@ void HistogramViewer::SelectRGBSliceView(){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
-    sliceSlider->setMaximum(255*3 + 1);
+    if (rgbSumCheckbox->isChecked()){
+        sliceSlider->setMaximum(255*3 + 1);
+        sliceSlider->setSliderPosition(0);
 
-    QPixmap blankPixmap = QPixmap(256, 256);
-    blankPixmap.fill();
-    pixSlices.clear();
-    pixSlices.resize(255*3 + 1, blankPixmap);
+        QPixmap blankPixmap = QPixmap(256, 256);
+        blankPixmap.fill();
+        pixSlices.clear();
+        pixSlices.resize(255*3 + 1, blankPixmap);
+    }
+    else{
+        sliceSlider->setMaximum(256);
+        sliceSlider->setSliderPosition(0);
+
+        QPixmap blankPixmap = QPixmap(256, 256);
+        blankPixmap.fill();
+        pixSlices.clear();
+        pixSlices.resize(256 , blankPixmap);
+    }
 
     LoadHistData(colorCombobox->currentText(),scaleComboBox->currentText().QString::toInt(), rgbSumCheckbox->isChecked());
 
