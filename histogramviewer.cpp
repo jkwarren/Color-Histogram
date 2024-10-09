@@ -33,15 +33,27 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     sliceSlider->setSingleStep(1);
     rightLayout->addWidget(sliceSlider);
 
+    //color opitions
+    colorSelectLayout = new QHBoxLayout();
+    rightLayout-> addLayout(colorSelectLayout);
+
     //main color for histogram
     colorCombobox = new QComboBox();
     QStringList colorOptions = QStringList() <<"red" <<"green" << "blue";
     colorCombobox->addItems(colorOptions);
     colorCombobox->setItemText(0,"red");
     connect(colorCombobox, &QComboBox::currentTextChanged, this, &HistogramViewer::ChangeComboboxColor);
-    rightLayout->addWidget(colorCombobox);
+    colorSelectLayout->addWidget(colorCombobox);
 
+    //rgb sum option
+    rgbSumCheckbox = new QCheckBox();
+    connect(rgbSumCheckbox, &QCheckBox::clicked, this, &HistogramViewer::SelectRGBSliceView);
+    colorSelectLayout->addWidget(rgbSumCheckbox);
 
+    rgbSumLabel = new QLabel("check for r+g+b slice view");
+    colorSelectLayout-> addWidget(rgbSumLabel);
+
+    //scale combobox
     comboBoxLayout = new QHBoxLayout();
     rightLayout-> addLayout(comboBoxLayout, 2);
 
@@ -55,14 +67,13 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     connect(scaleComboBox, &QComboBox::currentTextChanged, this, &HistogramViewer::ChangeScaleValue);
     comboBoxLayout->addWidget(scaleComboBox);
 
-
+    //initialize pixmaps
     QPixmap blankPixmap = QPixmap(256, 256);
     blankPixmap.fill();
     pixSlices.resize(256, blankPixmap);
 
     //collect data
     histogramData.resize((1 << 24), 0);
-    totalPixels = 0;
     for (int y = 0; y < image.height(); ++y){
         //https://doc.qt.io/qt-6/qimage.html#scanLine
         //we use reinterpret cast bc the return
@@ -79,21 +90,21 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     }
 
 
-    LoadHistData(colorCombobox->currentText(), 2);
+    LoadHistData(colorCombobox->currentText(), 2, rgbSumCheckbox->isChecked());
     connect(sliceSlider, &QSlider::sliderMoved, this, &HistogramViewer::ChangeSlice);
     picLabel->setPixmap(pixSlices[0]);
 
 
 }
 
-void HistogramViewer::LoadHistData(QString color, int scale){
+void HistogramViewer::LoadHistData(QString color, int scale, bool rgbSum){
     QApplication::processEvents();
 
     char pixmapColor = color == "red" ? 'r' : color == "green" ? 'g': 'b';
     QVector<QImage> imageSlices;
     QImage blankImage = QPixmap(256,256).toImage();
     blankImage.fill(Qt::white);
-    imageSlices.resize(256, blankImage);
+    imageSlices.resize(rgbSum? (255*3 + 1) : 256, blankImage);
 
     for (int iData = 0; iData < 1<<24; ++iData){
         if (iData % 1000000 == 0) QApplication::processEvents();
@@ -102,17 +113,17 @@ void HistogramViewer::LoadHistData(QString color, int scale){
         uint yPixmap;
         switch(pixmapColor){
             case 'r':
-                primaryColorVal = qRed(iData);
+                primaryColorVal = rgbSum? qRed(iData) + qGreen(iData)+ qBlue(iData): qRed(iData);
                 xPixmap = qGreen(iData);
                 yPixmap = qBlue(iData);
                 break;
             case 'g':
-                primaryColorVal = qGreen(iData);
+                primaryColorVal = rgbSum? qRed(iData) + qGreen(iData)+ qBlue(iData):qGreen(iData);
                 xPixmap = qRed(iData);
                 yPixmap = qBlue(iData);
                 break;
             case 'b':
-                primaryColorVal = qBlue(iData);
+                primaryColorVal = rgbSum? qRed(iData) + qGreen(iData)+ qBlue(iData):qBlue(iData);
                 xPixmap = qRed(iData);
                 yPixmap = qGreen(iData);
                 break;
@@ -127,8 +138,14 @@ void HistogramViewer::LoadHistData(QString color, int scale){
                                                    histogramData[iData] > 0 ? pixelColor : Qt::black);
     }
 
-    for (int iSlice = 0; iSlice < 256; ++iSlice){
-        pixSlices[iSlice] = QPixmap::fromImage(imageSlices[iSlice]);
+    if (rgbSum){
+        for (int iSlice = 0; iSlice < 255*3 + 1; ++iSlice){
+            pixSlices[iSlice] = QPixmap::fromImage(imageSlices[iSlice]);
+        }
+    }else{
+        for (int iSlice = 0; iSlice < 256; ++iSlice){
+            pixSlices[iSlice] = QPixmap::fromImage(imageSlices[iSlice]);
+        }
     }
 
 }
@@ -143,7 +160,7 @@ void HistogramViewer::ChangeComboboxColor(QString color){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
-    LoadHistData(color, scaleComboBox->currentText().QString::toInt());
+    LoadHistData(color, scaleComboBox->currentText().QString::toInt(), rgbSumCheckbox->isChecked());
 
     mainWindow->setEnabled(true);
     mainWindow->statusBar()->clearMessage();
@@ -156,7 +173,26 @@ void HistogramViewer::ChangeScaleValue(QString value){
     mainWindow->statusBar()->show();
     QApplication::processEvents();
 
-    LoadHistData(colorCombobox->currentText(), value.QString::toInt());
+    LoadHistData(colorCombobox->currentText(), value.QString::toInt(), rgbSumCheckbox->isChecked());
+
+    mainWindow->setEnabled(true);
+    mainWindow->statusBar()->clearMessage();
+}
+
+void HistogramViewer::SelectRGBSliceView(){
+    mainWindow->statusBar()->showMessage("loading in histogram for selected scale...");
+    mainWindow->setEnabled(false);
+    mainWindow->statusBar()->show();
+    QApplication::processEvents();
+
+    sliceSlider->setMaximum(255*3 + 1);
+
+    QPixmap blankPixmap = QPixmap(256, 256);
+    blankPixmap.fill();
+    pixSlices.clear();
+    pixSlices.resize(255*3 + 1, blankPixmap);
+
+    LoadHistData(colorCombobox->currentText(),scaleComboBox->currentText().QString::toInt(), rgbSumCheckbox->isChecked());
 
     mainWindow->setEnabled(true);
     mainWindow->statusBar()->clearMessage();

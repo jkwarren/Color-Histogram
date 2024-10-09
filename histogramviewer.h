@@ -17,14 +17,17 @@ class HistogramViewer : public QWidget
     QPixmap *pixelBox;
     QLabel *picLabel;
     QSlider *sliceSlider;
+
+    QHBoxLayout *colorSelectLayout;
     QComboBox *colorCombobox;
+    QCheckBox *rgbSumCheckbox;
+    QLabel *rgbSumLabel;
 
     QHBoxLayout *comboBoxLayout;
     QComboBox *scaleComboBox;
     QLabel *comboBoxLabel;
 
     QVector<int> histogramData;
-    int totalPixels;
     QVector<QPixmap> pixSlices;
 
 
@@ -32,12 +35,13 @@ public:
     HistogramViewer(const QImage &_image);
 
 private:
-    void LoadHistData(QString color, int scale);
+    void LoadHistData(QString color, int scale, bool rgbSum);
 
 public slots:
     void ChangeSlice(int value);
     void ChangeComboboxColor(QString color);
     void ChangeScaleValue(QString value);
+    void SelectRGBSliceView();
 };
 
 #endif // HISTOGRAMVIEWER_H
