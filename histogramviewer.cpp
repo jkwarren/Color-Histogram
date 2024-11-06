@@ -20,10 +20,10 @@ HistogramViewer::HistogramViewer(const QImage &_image)
     mainLayout-> addLayout(rightLayout, 0);
 
     //histogram
-    pixelBox = new QPixmap(256, 256);
-    pixelBox->fill();
+    QPixmap pixelBox = QPixmap(256, 256);
+    pixelBox.fill();
     picLabel = new QLabel();
-    picLabel->setPixmap(*pixelBox);
+    picLabel->setPixmap(pixelBox);
     rightLayout->addWidget(picLabel, 4, Qt::AlignCenter);
 
     //slider for slices

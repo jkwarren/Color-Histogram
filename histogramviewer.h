@@ -14,7 +14,6 @@ class HistogramViewer : public QWidget
     ImageViewer *imageViewer;
 
     QVBoxLayout *rightLayout;
-    QPixmap *pixelBox;
     QLabel *picLabel;
     QSlider *sliceSlider;
 
